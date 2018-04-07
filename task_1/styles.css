@@ -1,0 +1,25 @@
+
+#info {
+    justify-content: space-between;
+}
+
+.info-item {
+    margin: 10px;
+}
+
+.flex-wrapper {
+    display: flex;
+}
+
+#left-info {
+    justify-content: flex-start;
+}
+
+#right-info {
+    justify-content: flex-end;
+}
+
+body {
+    max-width: 1000px;
+    margin: auto;
+}
