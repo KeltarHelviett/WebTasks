@@ -56,3 +56,9 @@ body {
 #log-in-and-register > * {
     margin: 2px;
 }
+
+#categories-catalog {
+    flex-direction: column;
+    align-items: flex-start;
+    
+}
