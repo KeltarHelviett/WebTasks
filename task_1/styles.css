@@ -9,6 +9,7 @@
 
 .flex-wrapper {
     display: flex;
+    align-items: center;
 }
 
 #left-info {
@@ -41,4 +42,17 @@ body {
 .main-panel-item {
     align-self: center;
     margin: 10px;
+}
+
+.main-panel-item-icon {
+    align-self: center;
+}
+
+#auth {
+    flex-direction: column;
+    margin: 5px;
+}
+
+#log-in-and-register > * {
+    margin: 2px;
 }
