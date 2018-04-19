@@ -44,6 +44,27 @@
     flex-basis: 1px;
 }
 
+.calendar-header-prev-month, .calendar-header-next-month {
+    -webkit-transition-duration: 0.4s;
+    transition-duration: 0.4s;
+    background-color: white;
+    color: black;
+    border: none;
+    align-self: stretch;
+}
+
+.calendar-header-prev-month:hover, .calendar-header-next-month:hover {
+    background-color: #e7e7e7;
+}
+
+.calendar-current-month {
+
+}
+
+.calendar-current-year {
+    
+}
+
 #cal {
     width: 500px;
     height: 300px;

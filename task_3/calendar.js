@@ -27,7 +27,7 @@ Calendar.prototype.init = function() {
     let month = this.observingDate.getMonth();
 
     while (this.carrier.firstChild) { 
-        this.carrier.removeChild(this.carrier.firstChild);
+        this.carrier.removeChild(this.carrier.firstChild); // ?
     }
 
     this.calendarHTML = document.createElement('div');
@@ -47,14 +47,14 @@ Calendar.prototype.init = function() {
         },
         {
             element: 'div',
-            onclick: undefined,
-            class: 'calendar-header-next-month',
+            onclick: (e) => { self.selectMonth(); },
+            class: 'calendar-current-month',
             innerText: `${Calendar.monthNames[month]}`
         },
         {
             element: 'div',
-            onclick: undefined,
-            class: 'calendar-header-next-month',
+            onclick: (e) => { self.selectYear(); },
+            class: 'calendar-current-year',
             innerText: `${year}`
         },
         {
@@ -85,8 +85,11 @@ Calendar.prototype.init = function() {
         wd.innerText = item;
         weekdays.appendChild(wd);
     });
-
+    
     this.calendarHTML.appendChild(weekdays);
+    let calendarRows = document.createElement('div');
+    calendarRows.classList.add('calendar-rows');
+    this.calendarHTML.appendChild(calendarRows);
 
     this.carrier.appendChild(this.calendarHTML);
     self.render();
@@ -94,7 +97,7 @@ Calendar.prototype.init = function() {
 
 Calendar.prototype.render = function() {
     let self = this;
-    // self.calendarHTML.removeChild(self.calendarHTML.lastChild);
+    self.calendarHTML.removeChild(self.calendarHTML.lastChild);
 
     let startDate = self.observingDate;
     startDate.setDate(1);
@@ -123,12 +126,23 @@ Calendar.prototype.render = function() {
     }
 }
 
+Calendar.prototype.addMonth = function (term) {
+    this.observingDate.setMonth(this.observingDate.getMonth() + term);
+    this.calendarHTML
+        .getElementsByClassName('calendar-current-month')[0]
+        .innerText = Calendar.monthNames[this.observingDate.getMonth()];
+    this.calendarHTML
+        .getElementsByClassName('calendar-current-year')[0]
+        .innerText = this.observingDate.getFullYear();
+    this.render();
+}
+
 Calendar.prototype.nextMonth = function () {
-    
+    this.addMonth(1);
 }
 
 Calendar.prototype.prevMonth = function () {
-    console.log(this.observingDate);
+    this.addMonth(-1);
 }
 
 Calendar.prototype.selectYear = function () {
