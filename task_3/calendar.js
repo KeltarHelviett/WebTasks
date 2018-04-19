@@ -73,6 +73,18 @@ Calendar.prototype.init = function() {
        header.appendChild(headerElem);
     });
 
+
+    let weekdays = document.createElement('div');
+    weekdays.classList.add('calendar-weekdays');
+
+    Calendar.shortWeekdayNames.forEach(function(item){
+        let wd = document.createElement('div');
+        wd.classList.add('calendar-weekday');
+        wd.innerText = item;
+        weekdays.appendChild(wd);
+    });
+
+    this.calendarHTML.appendChild(weekdays);
     // let prevMonthHTML = document.createElement('i');
     // prevMonthHTML.innerText = '<';
     // prevMonthHTML.classList.add('calendar-header-prev-month');

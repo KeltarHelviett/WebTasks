@@ -4,8 +4,12 @@
     /* align-items: center; */
 }
 
-.calendar-header {
+.calendar-header, .calendar-weekdays {
     display: flex;
     flex-direction: row;
     align-items: center;
+}
+
+.calendar-weekdays > * {
+    padding: 2px;
 }
