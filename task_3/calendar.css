@@ -1,7 +1,7 @@
 .calendar, .calendar-rows {
     display: flex;
     flex-direction: column;
-    /* align-items: center; */
+    cursor: pointer;
 }
 
 
@@ -35,7 +35,7 @@
     color: red;
 }
 
-.calendar-cell {
+.calendar-cell, .calendar-month-selector-month {
     display: flex;
     flex-grow: 1;
     flex-shrink: 1;
@@ -46,12 +46,13 @@
 }
 
 .calendar-cell:hover:not(.calendar-cell-selected) {
-    background-color: #555555;
+    background-color: #2ca7f8;
     color: white;
 }
 
 .calendar-cell-selected {
-    background-color: royalblue;
+    background-color: #2ca7f8;
+    color: white;
 }
 
 .calendar-cell-weekend-or-holiday {
@@ -86,6 +87,29 @@
 
 .calendar-current-year {
     
+}
+
+.calendar-month-selector {
+    display: none;
+}
+
+.calendar-month-selector-shown {
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-month-selector-row {
+    display: flex;
+}
+
+.calendar-month-selector-month-selected {
+    background-color: #2ca7f8;
+    color: white;
+}
+
+.calendar-month-selector-month:hover:not(.calendar-month-selector-month-selected) {
+    background-color: #2ca7f8;
+    color: white;
 }
 
 #cal {

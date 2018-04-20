@@ -80,7 +80,29 @@ Calendar.prototype.init = function() {
        headerElem.onclick = item['onclick'];    
        header.appendChild(headerElem);
     });
-
+    
+    let monthSelector = document.createElement('div');
+    monthSelector.classList.add('calendar-month-selector');
+    this.calendarHTML.appendChild(monthSelector);
+    let row = undefined;
+    Calendar.mothShortNames.forEach(function (month, index) {
+        if (!(index % 3)) {
+            row = document.createElement('div');
+            row.classList.add('calendar-month-selector-row');
+            monthSelector.appendChild(row);
+        }
+        
+        let monthDiv = document.createElement('div');
+        monthDiv.classList.add('calendar-month-selector-month');
+        monthDiv.innerText = month;
+        monthDiv.onclick = function () {
+            self.observingDate.setMonth(index);
+            self.render();
+        };
+        if (index == self.observingDate.getMonth())
+            monthDiv.classList.add('calendar-month-selector-month-selected')
+        row.appendChild(monthDiv);
+    });
 
     let weekdays = document.createElement('div');
     weekdays.classList.add('calendar-weekdays');
@@ -106,7 +128,20 @@ Calendar.prototype.init = function() {
 Calendar.prototype.render = function() {
     let self = this;
     self.calendarHTML.removeChild(self.calendarHTML.lastChild);
-
+    self.calendarHTML
+        .getElementsByClassName('calendar-current-month')[0]
+        .innerText = Calendar.monthNames[this.observingDate.getMonth()];
+    self.calendarHTML
+        .getElementsByClassName('calendar-current-year')[0]
+        .innerText = this.observingDate.getFullYear();
+    self.calendarHTML.
+        getElementsByClassName('calendar-month-selector-month-selected')[0]
+        .classList.toggle('calendar-month-selector-month-selected');
+    self.calendarHTML.
+        getElementsByClassName('calendar-month-selector-month')
+        [self.observingDate.getMonth()].
+        classList.toggle('calendar-month-selector-month-selected');
+    
     let startDate = self.observingDate;
     startDate.setDate(1);
     startDate= new Date(startDate.getTime() - 86400000 * startDate.getDay());
@@ -175,9 +210,11 @@ Calendar.prototype.prevMonth = function () {
 }
 
 Calendar.prototype.selectYear = function () {
-
+    
 }
 
 Calendar.prototype.selectMonth = function () {
-
+    let monthSelector = this.calendarHTML.getElementsByClassName("calendar-month-selector")[0];
+    monthSelector
+    .classList.toggle("calendar-month-selector-shown");
 }
