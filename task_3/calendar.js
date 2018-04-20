@@ -6,9 +6,8 @@ function Calendar(id) {
     this.observingDate = new Date(Date.now());
     this.observingDate.setHours(0, 0, 0, 0);
     this.selectedDate = new Date(this.observingDate.getTime());
-    this.selectedCell = null;
-    this.cells = [];
-
+    this.coreYear = this.observingDate.getFullYear();
+    this.GMT = this.observingDate.getTimezoneOffset();
     if (!this.carrier)
         throw HTMLUnknownElement;
  
@@ -46,7 +45,7 @@ Calendar.prototype.init = function() {
     header.classList.add('calendar-header');
     this.calendarHTML.appendChild(header);
 
-    let headerElems = [
+    [
         {
             element: 'button',
             onclick: (e) => { self.prevMonth(); self.render(); },
@@ -71,9 +70,7 @@ Calendar.prototype.init = function() {
             class: 'calendar-header-next-month',
             innerText: '>'
         }
-    ];
-
-    headerElems.forEach(function(item){
+    ].forEach(function(item){
        let headerElem = document.createElement(item['element']);
        headerElem.innerText = item['innerText'];
        headerElem.classList.add(item['class']);
@@ -104,6 +101,24 @@ Calendar.prototype.init = function() {
         row.appendChild(monthDiv);
     });
 
+    self.yearSelectorHTML = document.createElement('div');
+    self.yearSelectorHTML.classList.add('calendar-year-selector');
+    [
+        {innerText: '<', onclick: () => { self.prevYearGroup(); },
+         class: 'calendar-year-group-picker', elem: 'button'},
+        {innerText: undefined, onclick: undefined, 
+         class: 'calendar-year-selector-rows', elem: 'div'},
+        {innerText: '>', onclick: () => { self.nextYearGroup(); },
+         class: 'calendar-year-group-picker', elem: 'button'}
+    ].forEach(function (item) {
+        let e = document.createElement(item.elem);
+        e.classList.add(item.class);
+        e.innerText = item.innerText;
+        e.onclick = item.onclick;
+        self.yearSelectorHTML.appendChild(e);
+    })
+    self.calendarHTML.appendChild(self.yearSelectorHTML);
+
     let weekdays = document.createElement('div');
     weekdays.classList.add('calendar-weekdays');
 
@@ -128,27 +143,35 @@ Calendar.prototype.init = function() {
 Calendar.prototype.render = function() {
     let self = this;
     self.calendarHTML.removeChild(self.calendarHTML.lastChild);
-    self.calendarHTML
-        .getElementsByClassName('calendar-current-month')[0]
-        .innerText = Calendar.monthNames[this.observingDate.getMonth()];
-    self.calendarHTML
-        .getElementsByClassName('calendar-current-year')[0]
-        .innerText = this.observingDate.getFullYear();
+    [{ name: 'month', getValue: () => Calendar.monthNames[this.observingDate.getMonth()] },
+     { name: 'year', getValue: () => self.observingDate.getFullYear() }]
+        .forEach(function (item) {
+            let css = `calendar-${item.name}-selector-${item.name}`
+            let e = self.calendarHTML.getElementsByClassName(css + '-selected')[0];
+            if (typeof e != 'undefined') e.classList.toggle(css + '-selected');
+            self.calendarHTML
+                .getElementsByClassName(`calendar-current-${item.name}`)[0]
+                .innerText = item.getValue();
+        });
     self.calendarHTML.
-        getElementsByClassName('calendar-month-selector-month-selected')[0]
-        .classList.toggle('calendar-month-selector-month-selected');
-    self.calendarHTML.
-        getElementsByClassName('calendar-month-selector-month')
-        [self.observingDate.getMonth()].
-        classList.toggle('calendar-month-selector-month-selected');
+            getElementsByClassName('calendar-month-selector-month')
+            [self.observingDate.getMonth()].
+            classList.toggle('calendar-month-selector-month-selected');
     
-    let startDate = self.observingDate;
+    let years = self.yearSelectorHTML.getElementsByClassName('calendar-year-selector-year');
+    for (let i = 0; i < years.length; i++)
+        if (parseInt(years[i].innerText) == self.observingDate.getFullYear()) {
+            years[i].classList.toggle('calendar-year-selector-year-selected');
+            break;
+        }
+
+    let startDate = new Date(self.observingDate.getTime());
     startDate.setDate(1);
-    startDate= new Date(startDate.getTime() - 86400000 * startDate.getDay());
+    console.log(startDate.getDate() - startDate.getDay());
+    startDate.setDate(startDate.getDate() - startDate.getDay());
     startDate.setHours(0, 0, 0, 0);
     let endDate = new Date(self.observingDate.getFullYear(), self.observingDate.getMonth() + 1, 0);
-    endDate = new Date(endDate.getTime() + 86400000 * (6 - endDate.getDay()));
-    
+    endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
     let calendarRows = document.createElement('div');
     calendarRows.classList.add('calendar-rows');
     self.calendarHTML.appendChild(calendarRows);
@@ -166,6 +189,7 @@ Calendar.prototype.render = function() {
         }
         let cell = document.createElement('div');
         cell.classList.add('calendar-cell');
+
         if (startDateTime == selectedDateTime)
             cell.classList.add('calendar-cell-selected');
         if (Calendar.isWeekendOrHoliday(startDate))
@@ -175,6 +199,7 @@ Calendar.prototype.render = function() {
             cell.classList.add('calendar-cell-prev-month')
         else if (startDateMonth > observingMonth || (startDateMonth == 0 && observingMonth == 11))
             cell.classList.add('calendar-cell-next-month')
+
         cell.onclick = function () {            
             if (cell.classList.contains('calendar-cell-next-month'))
                 self.nextMonth();
@@ -187,7 +212,7 @@ Calendar.prototype.render = function() {
         }
         cell.innerText = startDate.getDate();
         row.appendChild(cell);
-        startDate = new Date(startDateTime + 86400000)
+        startDate.setDate(startDate.getDate() + 1);
     }
 }
 
@@ -209,8 +234,48 @@ Calendar.prototype.prevMonth = function () {
     this.addMonth(-1);
 }
 
+Calendar.prototype.yearGroup = function (year) {
+    let self = this;
+    this.coreYear = year;
+    let yearRows = this.yearSelectorHTML
+        .getElementsByClassName('calendar-year-selector-rows')[0]; 
+    while (yearRows.firstChild) {
+        yearRows.removeChild(yearRows.firstChild);
+    }
+
+    let row = undefined;
+    for (let i = year - 4; i <= year + 4; ++i) {
+        if (!((i + 4 - year) % 3)) {
+            row = document.createElement('div');
+            row.classList.add('calendar-year-selector-row');
+            yearRows.appendChild(row);
+        }
+        let yearHTML = document.createElement('div');
+        yearHTML.classList.add('calendar-year-selector-year');
+        yearHTML.innerText = i;
+        yearHTML.onclick = function () {
+            self.observingDate.setFullYear(i);
+            self.render();
+        }
+        if (i == year)
+            yearHTML.classList.toggle('calendar-year-selector-year-selected');
+        row.appendChild(yearHTML);
+    }
+
+}
+
+Calendar.prototype.prevYearGroup = function () {
+    console.log('asdasdasd');
+    this.yearGroup(this.coreYear - 9); 
+}
+
+Calendar.prototype.nextYearGroup = function () {
+    this.yearGroup(this.coreYear + 9);
+}
+
 Calendar.prototype.selectYear = function () {
-    
+    this.yearGroup(this.observingDate.getFullYear());
+    this.yearSelectorHTML.classList.toggle('calendar-year-selector-shown');
 }
 
 Calendar.prototype.selectMonth = function () {

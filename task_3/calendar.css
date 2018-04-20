@@ -1,9 +1,12 @@
-.calendar, .calendar-rows {
+.calendar, .calendar-rows, .calendar-year-selector-rows {
     display: flex;
     flex-direction: column;
     cursor: pointer;
 }
 
+.calendar-year-selector-rows {
+    flex-grow: 1;
+}
 
 .calendar {
     border-style: solid;
@@ -35,7 +38,7 @@
     color: red;
 }
 
-.calendar-cell, .calendar-month-selector-month {
+.calendar-cell, .calendar-month-selector-month, .calendar-year-selector-year {
     display: flex;
     flex-grow: 1;
     flex-shrink: 1;
@@ -89,16 +92,25 @@
     
 }
 
-.calendar-month-selector {
+.calendar-month-selector, .calendar-year-selector{
     display: none;
 }
 
 .calendar-month-selector-shown {
     display: flex;
     flex-direction: column;
+    border-style: solid;
+    border-width: 2px 0px 0px 0px;
 }
 
-.calendar-month-selector-row {
+.calendar-year-selector-shown {
+    display: flex;
+    flex-direction: row;
+    border-style: solid;
+    border-width: 2px 0px 0px 0px;
+}
+
+.calendar-month-selector-row, .calendar-year-selector-row {
     display: flex;
 }
 
@@ -110,6 +122,30 @@
 .calendar-month-selector-month:hover:not(.calendar-month-selector-month-selected) {
     background-color: #2ca7f8;
     color: white;
+}
+
+.calendar-year-selector-year-selected {
+    background-color: #2ca7f8;
+    color: white;
+}
+
+.calendar-year-selector-year:hover:not(.calendar-year-selector-year-selected) {
+    background-color: #2ca7f8;
+    color: white;
+}
+
+.calendar-year-group-picker {
+    display: flex;
+    justify-content: stretch;
+    -webkit-transition-duration: 0.4s;
+    transition-duration: 0.4s;
+    background-color: white;
+    color: black;
+    border: none;
+}
+
+.calendar-year-group-picker:hover {
+    background-color: #e7e7e7;
 }
 
 #cal {
