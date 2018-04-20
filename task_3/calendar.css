@@ -42,6 +42,29 @@
     align-items: center;
     justify-content: center;
     flex-basis: 1px;
+    transition: background-color 0.2s;
+}
+
+.calendar-cell:hover:not(.calendar-cell-selected) {
+    background-color: #555555;
+    color: white;
+}
+
+.calendar-cell-selected {
+    background-color: royalblue;
+}
+
+.calendar-cell-weekend-or-holiday {
+    color: red;
+}
+
+.calendar-cell-prev-month, .calendar-cell-next-month {
+    color: gray;
+}
+
+.calendar-cell-weekend-or-holiday.calendar-cell-prev-month,
+.calendar-cell-weekend-or-holiday.calendar-cell-next-month {
+    color: lightcoral;
 }
 
 .calendar-header-prev-month, .calendar-header-next-month {
@@ -66,6 +89,6 @@
 }
 
 #cal {
-    width: 500px;
+    width: 300px;
     height: 300px;
 }

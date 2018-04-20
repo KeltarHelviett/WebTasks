@@ -4,13 +4,14 @@ function Calendar(id) {
 
     this.carrier = document.getElementById(id);
     this.observingDate = new Date(Date.now());
-    this.selectedDate = this.selectedDate;
+    this.observingDate.setHours(0, 0, 0, 0);
+    this.selectedDate = new Date(this.observingDate.getTime());
     this.selectedCell = null;
     this.cells = [];
 
     if (!this.carrier)
         throw HTMLUnknownElement;
-
+ 
     this.init();
 
 }
@@ -20,6 +21,13 @@ Calendar.monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
 Calendar.mothShortNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June',
                            'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
 Calendar.shortWeekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+Calendar.isWeekendOrHoliday = function(date) {
+    let weekday = date.getDay();
+    if (weekday == 0 || weekday == 6)
+        return true;
+    return false;
+}
 
 Calendar.prototype.init = function() {
     let self = this;
@@ -41,7 +49,7 @@ Calendar.prototype.init = function() {
     let headerElems = [
         {
             element: 'button',
-            onclick: (e) => { self.prevMonth(); },
+            onclick: (e) => { self.prevMonth(); self.render(); },
             class: 'calendar-header-prev-month',
             innerText: '<'
         },
@@ -59,7 +67,7 @@ Calendar.prototype.init = function() {
         },
         {
             element: 'button',
-            onclick: (e) => { self.nextMonth(); },
+            onclick: (e) => { self.nextMonth(); self.render(); },
             class: 'calendar-header-next-month',
             innerText: '>'
         }
@@ -111,8 +119,11 @@ Calendar.prototype.render = function() {
     self.calendarHTML.appendChild(calendarRows);
     
     let row = undefined;
-
+    let selectedDateTime = self.selectedDate.getTime();
+    let observingMonth = this.observingDate.getMonth();
     while (startDate <= endDate) {
+        let startDateTime = startDate.getTime();
+        let startDateMonth = startDate.getMonth();
         if (!startDate.getDay()) {
             row = document.createElement('div');
             row.classList.add('calendar-row');
@@ -120,9 +131,28 @@ Calendar.prototype.render = function() {
         }
         let cell = document.createElement('div');
         cell.classList.add('calendar-cell');
+        if (startDateTime == selectedDateTime)
+            cell.classList.add('calendar-cell-selected');
+        if (Calendar.isWeekendOrHoliday(startDate))
+            cell.classList.add('calendar-cell-weekend-or-holiday');
+        if (!(startDateMonth == 0 && observingMonth == 11) && startDateMonth < observingMonth ||
+                (startDateMonth == 11 && observingMonth == 0))
+            cell.classList.add('calendar-cell-prev-month')
+        else if (startDateMonth > observingMonth || (startDateMonth == 0 && observingMonth == 11))
+            cell.classList.add('calendar-cell-next-month')
+        cell.onclick = function () {            
+            if (cell.classList.contains('calendar-cell-next-month'))
+                self.nextMonth();
+            else if (cell.classList.contains('calendar-cell-prev-month'))
+                self.prevMonth();
+            
+            self.selectedDate = new Date(self.observingDate.getTime());
+            self.selectedDate.setDate(parseInt(cell.innerText));
+            self.render();
+        }
         cell.innerText = startDate.getDate();
         row.appendChild(cell);
-        startDate = new Date(startDate.getTime() + 86400000)
+        startDate = new Date(startDateTime + 86400000)
     }
 }
 
@@ -134,7 +164,6 @@ Calendar.prototype.addMonth = function (term) {
     this.calendarHTML
         .getElementsByClassName('calendar-current-year')[0]
         .innerText = this.observingDate.getFullYear();
-    this.render();
 }
 
 Calendar.prototype.nextMonth = function () {
