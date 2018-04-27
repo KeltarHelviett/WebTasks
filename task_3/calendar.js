@@ -1,23 +1,37 @@
+// document.write('<link href="https://fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">');
 
-function Calendar(id) {
-    this.carrier = document.getElementById(id);
-    if (!this.carrier)
-        throw HTMLUnknownElement;
-    this.observingDate = new Date(Date.now());
-    this.observingDate.setHours(0, 0, 0, 0);
-    this.selectedDate = new Date(this.observingDate.getTime());
-    this.coreYear = this.observingDate.getFullYear();
-    this.GMT = this.observingDate.getTimezoneOffset();
-    this.init();
+Calendar.formatElements = {
+    yyyy: {
+        regex: '([0-9]{4})',
+        replace:  (date) => date.getFullYear(),
+        assign: (date, value) => date.setFullYear(value),
+        priority: 0
+    },
+    MM: {
+        regex: '([0-9]{1,2})',
+        replace: (date) => (date.getMonth() > 9 ? '' : '0') + date.getMonth(),
+        assign: (date, value) => date.setMonth(value),
+        priority: 1  
+    },
+    dd: {
+        regex: '([0-9]{1,2})',
+        replace: (date) => (date.getDate() > 9 ? '' : '0') + date.getDate(),
+        assign: (date, value) => date.setDate(value),
+        priority: 2
+    }
 }
 
-Calendar.monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                       'July', 'August', 'September', 'October', 'November', 'December'];
-Calendar.mothShortNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June',
-                           'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
-Calendar.shortWeekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+Date.prototype.toFormatedString = function (format) {
+    f = (' ' + format).slice(1);
+    for (fe in Calendar.formatElements) {
+        if (Calendar.formatElements.hasOwnProperty(fe)) {
+            f = f.replace(fe, Calendar.formatElements[fe].replace(this));
+        }
+    }
+    return f;
+}
 
-Calendar.createElement = function (elem = 'div', classList = [], innerText = '', onclick = undefined) {
+createElement = function (elem = 'div', classList = [], innerText = '', onclick = undefined) {
     let e = document.createElement(elem);
     e.innerText = innerText;
     e.onclick = onclick;
@@ -26,6 +40,26 @@ Calendar.createElement = function (elem = 'div', classList = [], innerText = '',
     })
     return e;
 }
+
+function Calendar(element, format = 'yyyy:MM:dd') {
+    this.carrier = element;
+    this.format = format;
+    if (!this.carrier)
+        throw HTMLUnknownElement;
+    this.observingDate = new Date(Date.now());
+    this.observingDate.setHours(0, 0, 0, 0);
+    this.selectedDate = new Date(this.observingDate.getTime());
+    this.coreYear = this.observingDate.getFullYear();
+    this.GMT = this.observingDate.getTimezoneOffset();
+    this.subscribers = [];
+    this.init();
+}
+
+Calendar.monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+Calendar.mothShortNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June',
+                           'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+Calendar.shortWeekdayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 Calendar.isWeekendOrHoliday = function(date) {
     let weekday = date.getDay();
@@ -39,12 +73,8 @@ Calendar.prototype.init = function() {
     let year  = this.observingDate.getFullYear();
     let month = this.observingDate.getMonth();
 
-    while (this.carrier.firstChild) { 
-        this.carrier.removeChild(this.carrier.firstChild); // ?
-    }
-
-    this.calendar = Calendar.createElement('div', ['calendar']);
-    let header = Calendar.createElement('div', ['calendar-header'])
+    this.calendar = createElement('div', ['calendar']);
+    let header = createElement('div', ['calendar-header'])
     this.calendar.appendChild(header);
 
     [
@@ -53,48 +83,48 @@ Calendar.prototype.init = function() {
         ['div', ['calendar-current-year'], '', (e) => { self.selectYear(); }],
         ['button', ['calendar-header-next-month'], '>', (e) => { self.nextMonth(); self.render(); }],
     ].forEach(function (i) {
-        header.appendChild(Calendar.createElement(i[0], i[1], i[2], i[3]));
+        header.appendChild(createElement(i[0], i[1], i[2], i[3]));
     })
     
-    this.monthSelector = Calendar.createElement('div', ['calendar-month-selector']);
+    this.monthSelector = createElement('div', ['calendar-month-selector']);
     this.calendar.appendChild(this.monthSelector);
     let row = undefined;
     Calendar.mothShortNames.forEach(function (month, index) {
         if (!(index % 3)) {
-            row = Calendar.createElement('div', ['calendar-month-selector-row']);
+            row = createElement('div', ['calendar-month-selector-row']);
             self.monthSelector.appendChild(row);
         }
         classList = ['calendar-month-selector-month'];
         if (index == self.observingDate.getMonth())
             classList.push('calendar-month-selector-month-selected')
-        row.appendChild(Calendar.createElement('div', classList, month, () => {
+        row.appendChild(createElement('div', classList, month, () => {
             self.observingDate.setMonth(index);
             self.render();
         }))
     });
 
-    self.yearSelector = Calendar.createElement('div', ['calendar-year-selector']);
+    self.yearSelector = createElement('div', ['calendar-year-selector']);
     [
         ['button', ['calendar-year-group-picker'], '<', () => { self.prevYearGroup(); }], 
         ['div', ['calendar-year-selector-rows'], undefined, undefined],
         ['button', ['calendar-year-group-picker'], '>', () => { self.nextYearGroup(); }]
     ].forEach(function (i) {
-        self.yearSelector.appendChild(Calendar.createElement(i[0], i[1], i[2], i[3]));
+        self.yearSelector.appendChild(createElement(i[0], i[1], i[2], i[3]));
     })
 
     self.calendar.appendChild(self.yearSelector);
 
-    let weekdays = Calendar.createElement('div', ['calendar-weekdays']);
+    let weekdays = createElement('div', ['calendar-weekdays']);
 
     Calendar.shortWeekdayNames.forEach(function(item, index){
         classList = ['calendar-weekday'];
         if (index == 0 || index == 6)
             classList.push('calendar-weekday-weekend');
-        weekdays.appendChild(Calendar.createElement('div', classList, item));
+        weekdays.appendChild(createElement('div', classList, item));
     });
     
     this.calendar.appendChild(weekdays);
-    this.calendar.appendChild(Calendar.createElement('div', ['calendar-rows']));
+    this.calendar.appendChild(createElement('div', ['calendar-rows']));
 
     this.carrier.appendChild(this.calendar);
     self.render();
@@ -102,6 +132,9 @@ Calendar.prototype.init = function() {
 
 Calendar.prototype.render = function() {
     let self = this;
+    this.subscribers.forEach((sub) => {
+        sub.value = self.selectedDate.toFormatedString(self.format);
+    });
     self.calendar.removeChild(self.calendar.lastChild);
     [{ name: 'month', getValue: () => Calendar.monthNames[this.observingDate.getMonth()] },
      { name: 'year', getValue: () => self.observingDate.getFullYear() }]
@@ -132,7 +165,7 @@ Calendar.prototype.render = function() {
     startDate.setHours(0, 0, 0, 0);
     let endDate = new Date(self.observingDate.getFullYear(), self.observingDate.getMonth() + 1, 0);
     endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
-    let calendarRows = Calendar.createElement('div', ['calendar-rows'])
+    let calendarRows = createElement('div', ['calendar-rows'])
     self.calendar.appendChild(calendarRows);
     
     let row = undefined;
@@ -143,10 +176,10 @@ Calendar.prototype.render = function() {
         let startDateTime = startDate.getTime();
         let startDateMonth = startDate.getMonth();
         if (!startDate.getDay()) {
-            row = Calendar.createElement('div', ['calendar-row']);
+            row = createElement('div', ['calendar-row']);
             calendarRows.appendChild(row);
         }
-        let cell = Calendar.createElement('div', ['calendar-cell']);
+        let cell = createElement('div', ['calendar-cell']);
 
         if (startDateTime == selectedDateTime)
             cell.classList.add('calendar-cell-selected');
@@ -210,7 +243,7 @@ Calendar.prototype.yearGroup = function (year) {
             row.classList.add('calendar-year-selector-row');
             yearRows.appendChild(row);
         }
-        row.appendChild(Calendar.createElement('div', ['calendar-year-selector-year'],
+        row.appendChild(createElement('div', ['calendar-year-selector-year'],
             i, () => {
             self.observingDate.setFullYear(i);
             self.render();    
@@ -234,4 +267,80 @@ Calendar.prototype.selectYear = function () {
 
 Calendar.prototype.selectMonth = function () {
     this.monthSelector.classList.toggle("calendar-month-selector-shown");
+}
+
+Calendar.prototype.addSubscriber = function (sub) {
+    this.subscribers.push(sub);
+    sub.value = this.selectedDate.toFormatedString(this.format)
+}
+
+Calendar.prototype.selectDate = function (dateStr, sender = null) {
+    let format = (' ' + this.format).slice(1); 
+    let r = (' ' + this.format).slice(1);
+    let orderedFormatElements = [];
+    r = r.replace('.', '\\.');
+    for (fe in Calendar.formatElements) {
+        if (Calendar.formatElements.hasOwnProperty(fe)) {
+            r = r.replace(fe, Calendar.formatElements[fe].regex)
+            while (format.indexOf(fe) != -1) {
+                orderedFormatElements.push(fe);
+                format = format.replace(fe, '');
+            }
+        }
+    }
+    let values = {};
+    r = new RegExp(r);
+    if (!r.test(dateStr)) {
+        if (sender && !sender.classList.contains('datepicker-date-string-invalid')) {
+            sender.classList.add('datepicker-date-string-invalid');
+        }
+        return;
+    }
+    dateStr.replace(r, function () {
+        for (let i = 1; i < arguments.length - 2; ++i) {
+            values[orderedFormatElements[i - 1]] = arguments[i];
+        }
+    })
+    orderedFormatElements.sort((a, b) => a.priority - b.priority)
+    orderedFormatElements.forEach((fe) => {
+        Calendar.formatElements[fe].assign(this.observingDate, values[fe]);
+        Calendar.formatElements[fe].assign(this.selectedDate, values[fe]);
+    })
+    if (sender && sender.classList.contains('datepicker-date-string-invalid')) {
+        sender.classList.remove('datepicker-date-string-invalid');
+    }
+    this.render();
+
+}
+
+function Datepicker(carrier) {
+    this.carrier = carrier;
+    this.init();
+}
+
+Datepicker.prototype.init = function () {
+    let self = this;
+    this.datepicker = createElement('div', ['datepicker']);
+
+    let row = createElement('div', ['datepicker-row']);
+    this.datepicker.appendChild(row);
+    this.carrier.appendChild(this.datepicker);
+    this.input = createElement('input', ['datepicker-input']);
+    this.input.onchange = () => {
+        self.calendar.selectDate(self.input.value, self.input);
+    }
+    this.calendarTrigger = createElement('button', 
+        ['material-icons', 'datepicker-calendar-trigger'], '\uE878');
+    this.calendarTrigger.click();
+    row.appendChild(this.input);
+    row.appendChild(this.calendarTrigger);
+
+    row = createElement('div', ['datepicker-row']);
+    this.calendar = new Calendar(this.datepicker, 'dd/yyyy/MM');
+    this.calendarTrigger.onclick = () => {
+        this.calendar.calendar.classList.toggle('calendar-hidden');
+    }
+    this.calendar.addSubscriber(this.input);
+    this.datepicker.appendChild(row);
+    row.appendChild(this.calendar.calendar);
 }

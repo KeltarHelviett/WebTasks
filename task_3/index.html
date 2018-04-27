@@ -3,15 +3,15 @@
 <head>
     <meta charset="utf-8" />
     <title>Page Title</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">
     <link rel="stylesheet" href="calendar.css">
     <script src="calendar.js"></script>
 </head>
 <body>
     <div id="cal"></div>
     <script>
-        var c = null;
         window.onload = function() {
-            c = new Calendar('cal');
+            c = new Datepicker(document.getElementById('cal'));
         };
     </script>
 </body>

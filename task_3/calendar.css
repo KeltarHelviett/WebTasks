@@ -11,6 +11,7 @@
 .calendar {
     border-style: solid;
     border-width: 2px;
+    flex-grow: 1;
 }
 
 .calendar-header, .calendar-weekdays, .calendar-row {
@@ -148,7 +149,37 @@
     background-color: #e7e7e7;
 }
 
+.calendar-hidden {
+    display: none;
+}
+
 #cal {
     width: 300px;
-    height: 300px;
+    height: 400px;
+}
+
+.datepicker {
+    display: flex;
+    align-items: stretch;
+    flex-direction: column;
+}
+
+.datepicker-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.datepicker-input {
+    display: flex;
+    flex-grow: 1;
+}
+
+.datepicker-date-string-invalid {
+    border-color: red;
+}
+
+.datepicker-calendar-trigger {
+    font-size: 15px;
 }
