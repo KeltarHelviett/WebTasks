@@ -7,16 +7,36 @@ Calendar.formatElements = {
         assign: (date, value) => date.setFullYear(value),
         priority: 0
     },
+    MMM: {
+        regex: '([A-Za-z]{3,4})',
+        replace: (date) => Calendar.mothShortNames[date.getMonth()],
+        assign: (date, value) => {
+            let i = Calendar.mothShortNames.indexOf(value);
+            if (i == -1)
+                throw new Error('');
+            date.setMonth(i);
+        },
+        priority: 1
+    },
     MM: {
         regex: '([0-9]{1,2})',
-        replace: (date) => (date.getMonth() > 9 ? '' : '0') + date.getMonth(),
-        assign: (date, value) => date.setMonth(value),
+        replace: (date) => (date.getMonth() + 1 > 9 ? '' : '0') + (date.getMonth() + 1),
+        assign: (date, value) => {
+            if (parseInt(value) < 1 || parseInt(value) > 12)
+                throw new Error('');
+            date.setMonth(value - 1);
+        },
         priority: 1  
     },
     dd: {
         regex: '([0-9]{1,2})',
         replace: (date) => (date.getDate() > 9 ? '' : '0') + date.getDate(),
-        assign: (date, value) => date.setDate(value),
+        assign: (date, value) => {
+            let monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+            if (parseInt(value) > monthEnd.getDate() || parseInt(value) < 1)
+                throw new Error('');
+            date.setDate(value);
+        },
         priority: 2
     }
 }
@@ -274,26 +294,34 @@ Calendar.prototype.addSubscriber = function (sub) {
     sub.value = this.selectedDate.toFormatedString(this.format)
 }
 
+Calendar.prototype.setInvalidInput = function (sender) {
+    if (sender && !sender.classList.contains('datepicker-date-string-invalid')) {
+        sender.classList.add('datepicker-date-string-invalid');
+    }   
+}
+
 Calendar.prototype.selectDate = function (dateStr, sender = null) {
     let format = (' ' + this.format).slice(1); 
     let r = (' ' + this.format).slice(1);
     let orderedFormatElements = [];
+    let indecies = {}
     r = r.replace('.', '\\.');
     for (fe in Calendar.formatElements) {
         if (Calendar.formatElements.hasOwnProperty(fe)) {
             r = r.replace(fe, Calendar.formatElements[fe].regex)
+            let i = 0;
             while (format.indexOf(fe) != -1) {
                 orderedFormatElements.push(fe);
+                indecies[fe] = this.format.indexOf(fe, i)
                 format = format.replace(fe, '');
             }
         }
     }
+    orderedFormatElements.sort((a, b) => indecies[a] - indecies[b]);
     let values = {};
     r = new RegExp(r);
     if (!r.test(dateStr)) {
-        if (sender && !sender.classList.contains('datepicker-date-string-invalid')) {
-            sender.classList.add('datepicker-date-string-invalid');
-        }
+        this.setInvalidInput(sender);   
         return;
     }
     dateStr.replace(r, function () {
@@ -302,10 +330,16 @@ Calendar.prototype.selectDate = function (dateStr, sender = null) {
         }
     })
     orderedFormatElements.sort((a, b) => a.priority - b.priority)
-    orderedFormatElements.forEach((fe) => {
-        Calendar.formatElements[fe].assign(this.observingDate, values[fe]);
-        Calendar.formatElements[fe].assign(this.selectedDate, values[fe]);
-    })
+    try {
+
+        orderedFormatElements.forEach((fe) => {
+            Calendar.formatElements[fe].assign(this.observingDate, values[fe]);
+            Calendar.formatElements[fe].assign(this.selectedDate, values[fe]);
+        })
+    } catch (error) {
+        this.setInvalidInput(sender);
+        return;
+    }
     if (sender && sender.classList.contains('datepicker-date-string-invalid')) {
         sender.classList.remove('datepicker-date-string-invalid');
     }
