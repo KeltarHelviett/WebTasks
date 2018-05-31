@@ -1,5 +1,3 @@
-// document.write('<link href="https://fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">');
-
 Calendar.formatElements = {
     yyyy: {
         regex: '([0-9]{4})',
@@ -85,6 +83,7 @@ Calendar.isWeekendOrHoliday = function(date) {
     let weekday = date.getDay();
     if (weekday == 0 || weekday == 6)
         return true;
+    // TODO holidays
     return false;
 }
 
@@ -228,6 +227,10 @@ Calendar.prototype.render = function() {
         row.appendChild(cell);
         startDate.setDate(startDate.getDate() + 1);
     }
+    self.subscribers.forEach((sub) => {
+        if (sub.classList.contains('datepicker-date-string-invalid'))
+            sub.classList.remove('datepicker-date-string-invalid');
+    })
 }
 
 Calendar.prototype.addMonth = function (term) {

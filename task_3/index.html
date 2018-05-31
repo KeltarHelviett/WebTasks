@@ -5,14 +5,15 @@
     <title>Page Title</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">
     <link rel="stylesheet" href="calendar.css">
-    <script src="calendar.js"></script>
 </head>
 <body>
     <div id="cal"></div>
+    <div class="datetime-carrier"></div>
     <script>
         window.onload = function() {
             c = new Datepicker(document.getElementById('cal'));
         };
     </script>
+    <script src="calendar.js"></script>
 </body>
 </html> 

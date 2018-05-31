@@ -12,6 +12,11 @@
     align-items: center;
 }
 
+.flex-column {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
 #left-info {
     justify-content: flex-start;
 }
@@ -64,10 +69,7 @@ body {
     
 } */
 
-.flex-column {
-    flex-direction: column;
-    align-items: flex-start;
-}
+
 
 #info-feed {
     width: 150px;
@@ -84,4 +86,12 @@ body {
 
 .info-feed-item > * {
     margin-top: 5px;
+}
+
+#main {
+    align-items: flex-start
+}
+
+#shortcut-menu > * {
+    margin: 2px;
 }
