@@ -1,11 +1,32 @@
-/* ul {
-  width: 100%;
-}
-
-li {
-  display: inline;
-}
-
-li a, .dropbtn {
+nav.vertical {
   display: inline-block;
-} */
+  width:100%;
+}
+
+nav.vertical ul {
+  display: inline-block;
+}
+
+nav.vertical li {
+  position:relative;
+  display: inline-block;
+}
+
+nav.vertical a {
+  display:inline-block;
+  width: 100px;
+}
+
+nav.vertical li:hover > ul {
+  left:inherit;
+  top: 100%;
+  left: 0%;
+  visibility:visible;
+  opacity:1;
+}
+
+nav.vertical li:hover > ul.dropdown {
+  left:100%;
+  top: 0%;
+  float: left;
+}

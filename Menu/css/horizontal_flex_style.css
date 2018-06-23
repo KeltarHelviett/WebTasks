@@ -1,0 +1,20 @@
+nav.vertical {
+  width:100%;
+  
+}
+
+nav.vertical ul {
+  display: inline-flex;
+}
+
+nav.vertical li{
+  position:relative;
+}
+
+nav.vertical a {
+  display:block;
+}
+
+nav.vertical li:hover > ul {
+  top: 100%;
+}

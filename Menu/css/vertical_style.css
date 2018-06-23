@@ -1,16 +1,16 @@
-/* ul {
-  width: 100px;
+nav.vertical{
+  width:100px;
   float: left;
 }
 
-li {
-  display: block;
+nav.vertical li {
+  position:relative;
 }
 
-li, li.dropdown {
-  display: inline;
+nav.vertical a {
+  display:block;
 }
 
-li a, .dropbtn {
-  display: block;
-} */
+nav.vertical li:hover > ul {
+  left:100%;
+}

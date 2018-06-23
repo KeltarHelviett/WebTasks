@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" type="text/css" media="screen" href="css/style.css" />
     <link rel="stylesheet" type="text/css" media="screen" href="css/vertical_style.css" title="styles-vert"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="css/horizontal_flex_style.css" title="styles-flex-hor"/>
     <link rel="stylesheet" type="text/css" media="screen" href="css/horizontal_style.css" title="styles-hor"/>
     <title>Document</title>
 </head>
@@ -20,7 +21,33 @@
       <ul>
         <li><a href="#v">Vasya</a></li>
         <li><a href="#p">Petya</a></li>
-        <li><a href="#m">Masha</a><ul><li><a href="#">Phone</a></li></ul></li>
+        <li>
+          <a href="#m">Masha</a>
+          <ul class="dropdown">
+            <li>
+              <a href="#">Phone</a>
+              <ul class="dropdown">
+                  <li>
+                    <a href="#">+7914..</a>
+                  </li>
+                  <li>
+                    <a href="#">123123..</a>
+                  </li>
+              </ul>
+            </li>
+            <li>
+              <a href="#">Email</a>
+              <ul class="dropdown">
+                  <li>
+                    <a href="#">test@mail.com</a>
+                  </li>
+              </ul>
+            </li>
+            <li>
+              <a href="#">Skype</a>
+            </li>
+          </ul>
+        </li>
       </ul>
     </li>
     <li><a href="#about">About</a></li>
