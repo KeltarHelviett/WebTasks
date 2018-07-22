@@ -16,6 +16,8 @@ nav.vertical a {
   padding:10px 15px;
   background:#333;
   transition:0.2s;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 nav.vertical li:hover > a {
@@ -29,9 +31,12 @@ nav.vertical ul ul {
   width:100%;
   visibility:hidden;
   opacity:0;
+  transition:0.2s;
+  transform: translateX(50px)
 }
 
 nav.vertical li:hover > ul {
   visibility:visible;
   opacity:1;
+  transform: translateX(0px)
 }
